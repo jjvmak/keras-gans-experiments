@@ -2,14 +2,14 @@ import numpy as np
 import config
 from keras.datasets import mnist
 import os
-import generator
-import discriminator
+import generator_builder as gen
+import discriminator_builder
 from keras.layers import Input
 from keras.models import Model
 import matplotlib.pyplot as plt
 import cv2
 
-np.random.seed(10)
+# np.random.seed(10)
 
 def make_trainable(net, val):
     net.trainable = val
@@ -47,7 +47,7 @@ def save_images(C ,noise):
 
 
 C = config.Config()
-generator = generator.create_generator(C)
-generator.load_weights(C.model_path, by_name=True)
+generator = gen.create_generator(C)
+generator.load_weights(C.generator_model_path, by_name=True)
 noise = np.random.normal(0, 1, size=(100, C.noise_dim))
 show_images(C, noise)

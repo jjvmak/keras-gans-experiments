@@ -1,104 +1,93 @@
 import numpy as np
-import config
+from keras.models import Sequential
+from keras.optimizers import RMSprop
+from matplotlib import pyplot as plt
 from keras.datasets import mnist
-import os
-import generator
-import discriminator
-from keras.layers import Input
-from keras.models import Model
-import matplotlib.pyplot as plt
-import cv2
+import generator_builder
+import discriminator_builder
+import gan_builder
 
-np.random.seed(10)
 
-# TODO separate the training and testing modules
-# TODO verbose training
-# TODO TensorBoard logging
 
 def make_trainable(net, val):
     net.trainable = val
     for l in net.layers:
         l.trainable = val
 
-C = config.Config()
 
-# load the mnist data and flatten the input data
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
-x_train = (x_train.astype(np.float32) - 127.5) / 127.5
-x_train = x_train.reshape(-1, C.img_rows*C.img_cols*C.channels)
+def train(epochs=2000, batch=128):
+    d_metrics = []
+    a_metrics = []
 
-# create path for images
-if not os.path.isdir(C.save_path):
-    os.mkdir(C.save_path)
+    running_d_loss = 0
+    running_d_acc = 0
+    running_a_loss = 0
+    running_a_acc = 0
 
-generator = generator.create_generator(C)
-discriminator = discriminator.create_discriminator(C)
+    for i in range(epochs):
 
-''' 
-Set the trainable false, since
-generator and discriminator are combined into single model.
-This allows the generator to understand the discriminator 
-so it can update itself more effectively. 
-'''
-make_trainable(discriminator, False)
-generator.compile(loss='binary_crossentropy', optimizer=C.optimizer)
-discriminator.compile(loss='binary_crossentropy', optimizer=C.optimizer)
+        if i % 100 == 0:
+            print(i)
 
-gan_input = Input(shape=(C.noise_dim,))
-fake_image = generator(gan_input)
+        real_imgs = np.reshape(data[np.random.choice(data.shape[0], batch, replace=False)], (batch, 28, 28, 1))
+        fake_imgs = generator.predict(np.random.uniform(-1.0, 1.0, size=[batch, 100]))
 
-gan_output = discriminator(fake_image)
-
-gan = Model(gan_input, gan_output)
-gan.compile(loss='binary_crossentropy', optimizer=C.optimizer)
-
-
-# pre train
-noise = np.random.normal(0, 1, size=(C.batch_size, C.noise_dim))
-generated_images = generator.predict(noise)
-real_x = x_train[np.random.randint(0, x_train.shape[0], size=C.batch_size)]
-x = np.concatenate((real_x, generated_images))
-disc_y = np.zeros(2 * C.batch_size)
-disc_y[:C.batch_size] = 1.0
-make_trainable(discriminator, True)
-discriminator.fit(x, disc_y, epochs=5, batch_size=8)
-
-
-# training
-for epoch in range(C.epochs):
-    for batch in range(C.steps_per_epoch):
-        # generate random noise
-        noise = np.random.normal(0, 1, size=(C.batch_size, C.noise_dim))
-
-        # generate fake data
-        fake_x = generator.predict(noise)
-
-        # draw real sample from dataset
-        real_x = x_train[np.random.randint(0, x_train.shape[0], size=C.batch_size)]
-
-        x = np.concatenate((real_x, fake_x))
-
-        disc_y = np.zeros(2 * C.batch_size)
-        # label smoothing
-        # Salimans et al. 2016
-        disc_y[:C.batch_size] = 1.0
+        x = np.concatenate((real_imgs, fake_imgs))
+        y = np.ones([2 * batch, 1])
+        y[batch:, :] = 0
 
         make_trainable(discriminator, True)
-        d_loss = discriminator.train_on_batch(x, disc_y)
+
+        d_metrics.append(discriminator.train_on_batch(x, y))
+        running_d_loss += d_metrics[-1][0]
+        running_d_acc += d_metrics[-1][1]
 
         make_trainable(discriminator, False)
-        y_gen = np.ones(C.batch_size)
-        g_loss = gan.train_on_batch(noise, y_gen)
 
-    print(f'Epoch: {epoch} \t Discriminator Loss: {d_loss} \t\t Generator Loss: {g_loss}')
+        noise = np.random.uniform(-1.0, 1.0, size=[batch, 100])
+        y = np.ones([batch, 1])
 
-gan.save_weights(C.model_path)
+        a_metrics.append(gan.train_on_batch(noise, y))
+        running_a_loss += a_metrics[-1][0]
+        running_a_acc += a_metrics[-1][1]
+
+        if (i + 1) % 100 == 0:
+
+            print('Epoch #{}'.format(i + 1))
+            log_mesg = "%d: [D loss: %f, acc: %f]" % (i, running_d_loss / i, running_d_acc / i)
+            log_mesg = "%s  [A loss: %f, acc: %f]" % (log_mesg, running_a_loss / i, running_a_acc / i)
+            print(log_mesg)
+
+            gen_imgs = generator.predict(static_noise)
+
+            plt.figure(figsize=(5, 5))
+
+            for k in range(gen_imgs.shape[0]):
+                plt.subplot(4, 4, k + 1)
+                plt.imshow(gen_imgs[k, :, :, 0], cmap='gray')
+                plt.axis('off')
+
+            plt.tight_layout()
+            plt.show()
+
+    return a_metrics, d_metrics
 
 
+(data, y_train), (x_test, y_test) = mnist.load_data()
+data = np.reshape(data, (data.shape[0], 28, 28, 1))
+img_w, img_h = data.shape[1:3]
 
+# build discriminator
+discriminator = discriminator_builder.build()
+discriminator.compile(loss='binary_crossentropy', optimizer=RMSprop(lr=0.008, decay=6e-8, clipvalue=1.0),
+                      metrics=['accuracy'])
 
+# build generator
+generator = generator_builder.build()
 
+# build gan
+gan = gan_builder.build(generator, discriminator)
 
-
-
+static_noise = np.random.uniform(-1.0, 1.0, size=[16, 100])
+a_metrics_complete, d_metrics_complete = train(epochs=3000, batch=50)
 

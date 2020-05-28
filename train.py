@@ -1,12 +1,13 @@
 import numpy as np
 from keras.models import Sequential
-from keras.optimizers import RMSprop
+from keras.optimizers import RMSprop, Adam
 from matplotlib import pyplot as plt
 from keras.datasets import mnist
 import generator_builder
 import discriminator_builder
 import gan_builder
-
+import tensorflow as tf
+import data_handler
 
 
 def make_trainable(net, val):
@@ -15,7 +16,7 @@ def make_trainable(net, val):
         l.trainable = val
 
 
-def train(epochs=2000, batch=128):
+def train(epochs=2000, batch=16 ):
     d_metrics = []
     a_metrics = []
 
@@ -29,7 +30,8 @@ def train(epochs=2000, batch=128):
         if i % 100 == 0:
             print(i)
 
-        real_imgs = np.reshape(data[np.random.choice(data.shape[0], batch, replace=False)], (batch, 28, 28, 1))
+        #real_imgs = np.reshape(data[np.random.choice(data.shape[0], batch, replace=False)], (batch, 28, 28, 1))
+        real_imgs = data_sampler.random_sample(batch)
         fake_imgs = generator.predict(np.random.uniform(-1.0, 1.0, size=[batch, 100]))
 
         x = np.concatenate((real_imgs, fake_imgs))
@@ -51,7 +53,7 @@ def train(epochs=2000, batch=128):
         running_a_loss += a_metrics[-1][0]
         running_a_acc += a_metrics[-1][1]
 
-        if (i + 1) % 100 == 0:
+        if (i + 1) % 50 == 0:
 
             print('Epoch #{}'.format(i + 1))
             log_mesg = "%d: [D loss: %f, acc: %f]" % (i, running_d_loss / i, running_d_acc / i)
@@ -75,11 +77,16 @@ def train(epochs=2000, batch=128):
 
 (data, y_train), (x_test, y_test) = mnist.load_data()
 data = np.reshape(data, (data.shape[0], 28, 28, 1))
+data = data / 255
+data_sampler = data_handler.Data_handler(data, y_train)
 img_w, img_h = data.shape[1:3]
 
 # build discriminator
+loss = tf.keras.losses.BinaryCrossentropy(
+        from_logits=False, label_smoothing=0.1, reduction="auto", name="binary_crossentropy"
+    )
 discriminator = discriminator_builder.build()
-discriminator.compile(loss='binary_crossentropy', optimizer=RMSprop(lr=0.008, decay=6e-8, clipvalue=1.0),
+discriminator.compile(loss='binary_crossentropy', optimizer=RMSprop(lr=0.0008,decay=6e-8,clipvalue=1.0),
                       metrics=['accuracy'])
 
 # build generator
@@ -89,5 +96,5 @@ generator = generator_builder.build()
 gan = gan_builder.build(generator, discriminator)
 
 static_noise = np.random.uniform(-1.0, 1.0, size=[16, 100])
-a_metrics_complete, d_metrics_complete = train(epochs=3000, batch=50)
+a_metrics_complete, d_metrics_complete = train(epochs=2000, batch=150)
 

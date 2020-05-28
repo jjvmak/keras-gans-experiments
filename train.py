@@ -8,6 +8,8 @@ import discriminator_builder
 import gan_builder
 import tensorflow as tf
 import data_handler
+from datetime import datetime
+import os
 
 
 def make_trainable(net, val):
@@ -70,7 +72,8 @@ def train(epochs=2000, batch=16 ):
                 plt.axis('off')
 
             plt.tight_layout()
-            plt.show()
+            #plt.show()
+            plt.savefig(f'{save_path}/gan-images_epoch_{i}.png')
 
     return a_metrics, d_metrics
 
@@ -94,7 +97,11 @@ generator = generator_builder.build()
 
 # build gan
 gan = gan_builder.build(generator, discriminator)
-
 static_noise = np.random.uniform(-1.0, 1.0, size=[16, 100])
+
+save_path = "./results/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+if not os.path.isdir(save_path):
+    os.mkdir(save_path)
+
 a_metrics_complete, d_metrics_complete = train(epochs=2000, batch=150)
 

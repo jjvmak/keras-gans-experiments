@@ -105,3 +105,4 @@ if not os.path.isdir(save_path):
 
 a_metrics_complete, d_metrics_complete = train(epochs=2000, batch=150)
 
+generator.save_weights('generator_model.hdf5')

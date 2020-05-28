@@ -5,7 +5,7 @@ from keras.optimizers import RMSprop
 from keras.layers import LeakyReLU
 
 
-def build(z_dim=100, depth=64, p=0.4):  # 100 dimensional latent space / p represents dropout rate
+def build(z_dim=100, depth=64, p=0.2):  # 100 dimensional latent space / p represents dropout rate
     # define inputs
     inputs = Input((z_dim,))
 
@@ -33,7 +33,7 @@ def build(z_dim=100, depth=64, p=0.4):  # 100 dimensional latent space / p repre
     conv3 = (Dropout(p))(conv3)
 
     # output layer
-    output = Conv2D(1, kernel_size=5, padding='same')(conv3)  # , activation='sigmoid')(conv3)
+    output = Conv2D(1, kernel_size=3, padding='same')(conv3)  # , activation='sigmoid')(conv3)
     output = Activation('sigmoid')(output)
 
     # model definition

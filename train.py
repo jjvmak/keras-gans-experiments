@@ -18,7 +18,7 @@ def make_trainable(net, val):
         l.trainable = val
 
 
-def train(epochs=2000, batch=16 ):
+def train(epochs=2000, batch=16):
     d_metrics = []
     a_metrics = []
 
@@ -32,7 +32,7 @@ def train(epochs=2000, batch=16 ):
         if i % 100 == 0:
             print(i)
 
-        #real_imgs = np.reshape(data[np.random.choice(data.shape[0], batch, replace=False)], (batch, 28, 28, 1))
+        # real_imgs = np.reshape(data[np.random.choice(data.shape[0], batch, replace=False)], (batch, 28, 28, 1))
         real_imgs = data_sampler.random_sample(batch)
         fake_imgs = generator.predict(np.random.uniform(-1.0, 1.0, size=[batch, 100]))
 
@@ -72,8 +72,8 @@ def train(epochs=2000, batch=16 ):
                 plt.axis('off')
 
             plt.tight_layout()
-            #plt.show()
-            plt.savefig(f'{save_path}/gan-images_epoch_{i}.png')
+            # plt.show()
+            plt.savefig(f'{save_path}/gan-images_epoch_{i + 1}.png')
 
     return a_metrics, d_metrics
 
@@ -86,10 +86,10 @@ img_w, img_h = data.shape[1:3]
 
 # build discriminator
 loss = tf.keras.losses.BinaryCrossentropy(
-        from_logits=False, label_smoothing=0.1, reduction="auto", name="binary_crossentropy"
-    )
+    from_logits=False, label_smoothing=0.1, reduction="auto", name="binary_crossentropy"
+)
 discriminator = discriminator_builder.build()
-discriminator.compile(loss='binary_crossentropy', optimizer=RMSprop(lr=0.0008,decay=6e-8,clipvalue=1.0),
+discriminator.compile(loss='binary_crossentropy', optimizer=RMSprop(lr=0.0008, decay=6e-8, clipvalue=1.0),
                       metrics=['accuracy'])
 
 # build generator
@@ -103,6 +103,6 @@ save_path = "./results/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 if not os.path.isdir(save_path):
     os.mkdir(save_path)
 
-a_metrics_complete, d_metrics_complete = train(epochs=2000, batch=150)
+a_metrics_complete, d_metrics_complete = train(epochs=1000, batch=150)
 
 generator.save_weights('generator_model.hdf5')

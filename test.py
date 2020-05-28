@@ -1,53 +1,35 @@
 import numpy as np
 import config
-from keras.datasets import mnist
-import os
-import generator_builder as gen
-import discriminator_builder
-from keras.layers import Input
-from keras.models import Model
+import generator_builder
 import matplotlib.pyplot as plt
-import cv2
+from datetime import datetime
+import os
 
-# np.random.seed(10)
+def generate(noise, i=0, save=True):
+    gen_imgs = generator.predict(noise)
 
-def make_trainable(net, val):
-    net.trainable = val
-    for l in net.layers:
-        l.trainable = val
+    plt.figure(figsize=(5, 5))
 
-def show_images(C, noise):
-    generated_images = generator.predict(noise)
-    plt.figure(figsize=(10, 10))
-
-    for i, image in enumerate(generated_images):
-        plt.subplot(10, 10, i + 1)
-        if C.channels == 1:
-            plt.imshow(image.reshape((C.img_rows, C.img_cols)), cmap='gray')
-        else:
-            plt.imshow(image.reshape((C.img_rows, C.img_cols, C.channels)))
+    for k in range(gen_imgs.shape[0]):
+        plt.subplot(4, 4, k + 1)
+        plt.imshow(gen_imgs[k, :, :, 0], cmap='gray')
         plt.axis('off')
 
     plt.tight_layout()
-    plt.show()
+    if save:
+        plt.savefig(f'{save_path}/generated_images_{i}.png')
+    else:
+        plt.show()
 
-def save_images(C ,noise):
-    generated_images = generator.predict(noise)
 
-    for i, image in enumerate(generated_images):
-
-        if C.channels == 1:
-            image = image.reshape(C.img_rows, C.img_cols)
-            image *= 127
-            cv2.imwrite('./fcgan-images/{}.png'.format(i), image)
-        else:
-           image = image.reshape((C.img_rows, C.img_cols, C.channels))
-           image *= 127
-           cv2.imwrite('./fcgan-images/{}.png'.format(i), image)
-
+save_path = "./generated/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+if not os.path.isdir(save_path):
+    os.mkdir(save_path)
 
 C = config.Config()
-generator = gen.create_generator(C)
-generator.load_weights(C.generator_model_path, by_name=True)
-noise = np.random.normal(0, 1, size=(100, C.noise_dim))
-show_images(C, noise)
+generator = generator_builder.build()
+generator.load_weights('generator_model.hdf5', by_name=True)
+
+for i in range(10):
+    noise = np.random.uniform(-1.0, 1.0, size=[16, 100])
+    generate(noise=noise, i=i, save=True)

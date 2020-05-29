@@ -7,6 +7,7 @@ import discriminator_builder
 import gan_builder
 import tensorflow as tf
 import data_handler
+import data_handler_lfw
 from datetime import datetime
 import os
 from optparse import OptionParser
@@ -89,7 +90,8 @@ parser.add_option('-g', '--generator-frequency', dest='generator_frequency', def
 (data, y_train), (x_test, y_test) = mnist.load_data()
 data = np.reshape(data, (data.shape[0], 28, 28, 1))
 data = data / 255
-data_sampler = data_handler.Data_handler(data, y_train)
+#data_sampler = data_handler.Data_handler(data, y_train)
+data_sampler = data_handler_lfw.Data_handler_lfw()
 img_w, img_h = data.shape[1:3]
 
 # build discriminator

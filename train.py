@@ -10,6 +10,7 @@ import tensorflow as tf
 import data_handler
 from datetime import datetime
 import os
+from optparse import OptionParser
 
 
 def make_trainable(net, val):
@@ -18,7 +19,8 @@ def make_trainable(net, val):
         l.trainable = val
 
 
-def train(epochs=2000, batch=16):
+def train(epochs=1000, batch=150):
+
     d_metrics = []
     a_metrics = []
 
@@ -28,9 +30,6 @@ def train(epochs=2000, batch=16):
     running_a_acc = 0
 
     for i in range(epochs):
-
-        if i % 100 == 0:
-            print(i)
 
         # real_imgs = np.reshape(data[np.random.choice(data.shape[0], batch, replace=False)], (batch, 28, 28, 1))
         real_imgs = data_sampler.random_sample(batch)
@@ -55,15 +54,17 @@ def train(epochs=2000, batch=16):
         running_a_loss += a_metrics[-1][0]
         running_a_acc += a_metrics[-1][1]
 
-        if (i + 1) % 50 == 0:
+        if (i + 1) % int(options.log_frequency) == 0:
 
             print('Epoch #{}'.format(i + 1))
-            log_mesg = "%d: [D loss: %f, acc: %f]" % (i, running_d_loss / i, running_d_acc / i)
+            log_mesg = "[D loss: %f, acc: %f]" % (running_d_loss / i, running_d_acc / i)
             log_mesg = "%s  [A loss: %f, acc: %f]" % (log_mesg, running_a_loss / i, running_a_acc / i)
             print(log_mesg)
 
-            gen_imgs = generator.predict(static_noise)
 
+        if (i + 1) % int(options.generator_frequency) == 0:
+
+            gen_imgs = generator.predict(static_noise)
             plt.figure(figsize=(5, 5))
 
             for k in range(gen_imgs.shape[0]):
@@ -77,6 +78,13 @@ def train(epochs=2000, batch=16):
 
     return a_metrics, d_metrics
 
+# parse options
+parser = OptionParser()
+parser.add_option('-e', '--epochs', dest='epochs', default=1000, help='Number of epochs.')
+parser.add_option('-b', '--batch', dest='batch', default=150, help='Batch size. Use only dozens of equality. For example 50.')
+parser.add_option('-l', '--log-frequency', dest='log_frequency', default=50, help='Set training logging frequency.')
+parser.add_option('-g', '--generator-frequency', dest='generator_frequency', default=50, help='Set generator frequency.')
+(options, args) = parser.parse_args()
 
 (data, y_train), (x_test, y_test) = mnist.load_data()
 data = np.reshape(data, (data.shape[0], 28, 28, 1))
@@ -103,6 +111,7 @@ save_path = "./results/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 if not os.path.isdir(save_path):
     os.mkdir(save_path)
 
-a_metrics_complete, d_metrics_complete = train(epochs=1000, batch=150)
+a_metrics_complete, d_metrics_complete = train(epochs=int(options.epochs), batch=int(options.batch))
 
+print('saving generator weights')
 generator.save_weights('generator_model.hdf5')

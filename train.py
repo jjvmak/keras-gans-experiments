@@ -11,6 +11,7 @@ import data_handler
 from datetime import datetime
 import os
 from optparse import OptionParser
+import pandas as pd
 
 
 def make_trainable(net, val):
@@ -111,7 +112,30 @@ save_path = "./results/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 if not os.path.isdir(save_path):
     os.mkdir(save_path)
 
-a_metrics_complete, d_metrics_complete = train(epochs=int(options.epochs), batch=int(options.batch))
-
+#a_metrics_complete, d_metrics_complete = train(epochs=int(options.epochs), batch=int(options.batch))
+a_metrics_complete, d_metrics_complete = train(epochs=3, batch=30)
 print('saving generator weights')
 generator.save_weights('generator_model.hdf5')
+
+try:
+    ax = pd.DataFrame({
+        'Generator': [metric[0] for metric in a_metrics_complete],
+        'Discriminator': [metric[0] for metric in d_metrics_complete],
+    }).plot(title='Training Loss', logy=False)
+    ax.set_xlabel("Epochs")
+    ax.set_ylabel("Loss")
+    ax.get_figure().savefig(f'{save_path}/loss.png')
+
+    ax = pd.DataFrame({
+        'Generator': [metric[1] for metric in a_metrics_complete],
+        'Discriminator': [metric[1] for metric in d_metrics_complete],
+    }).plot(title='Training Accuracy', logy=False)
+    ax.set_xlabel("Epochs")
+    ax.set_ylabel("Accuracy")
+    ax.get_figure().savefig(f'{save_path}/accuracy.png')
+
+except Exception as e:
+    print(e)
+
+
+

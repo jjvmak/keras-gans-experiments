@@ -1,6 +1,5 @@
 import numpy as np
-from keras.models import Sequential
-from keras.optimizers import RMSprop, Adam
+from keras.optimizers import RMSprop
 from matplotlib import pyplot as plt
 from keras.datasets import mnist
 import generator_builder
@@ -21,7 +20,6 @@ def make_trainable(net, val):
 
 
 def train(epochs=1000, batch=150):
-
     d_metrics = []
     a_metrics = []
 
@@ -56,12 +54,10 @@ def train(epochs=1000, batch=150):
         running_a_acc += a_metrics[-1][1]
 
         if (i + 1) % int(options.log_frequency) == 0:
-
             print('Epoch #{}'.format(i + 1))
             log_mesg = "[D loss: %f, acc: %f]" % (running_d_loss / i, running_d_acc / i)
             log_mesg = "%s  [A loss: %f, acc: %f]" % (log_mesg, running_a_loss / i, running_a_acc / i)
             print(log_mesg)
-
 
         if (i + 1) % int(options.generator_frequency) == 0:
 
@@ -79,12 +75,15 @@ def train(epochs=1000, batch=150):
 
     return a_metrics, d_metrics
 
+
 # parse options
 parser = OptionParser()
 parser.add_option('-e', '--epochs', dest='epochs', default=1000, help='Number of epochs.')
-parser.add_option('-b', '--batch', dest='batch', default=150, help='Batch size. Use only dozens of equality. For example 50.')
+parser.add_option('-b', '--batch', dest='batch', default=150,
+                  help='Batch size. Use only dozens of equality. For example 50.')
 parser.add_option('-l', '--log-frequency', dest='log_frequency', default=50, help='Set training logging frequency.')
-parser.add_option('-g', '--generator-frequency', dest='generator_frequency', default=50, help='Set generator frequency.')
+parser.add_option('-g', '--generator-frequency', dest='generator_frequency', default=50,
+                  help='Set generator frequency.')
 (options, args) = parser.parse_args()
 
 (data, y_train), (x_test, y_test) = mnist.load_data()
@@ -112,7 +111,7 @@ save_path = "./results/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 if not os.path.isdir(save_path):
     os.mkdir(save_path)
 
-#a_metrics_complete, d_metrics_complete = train(epochs=int(options.epochs), batch=int(options.batch))
+# a_metrics_complete, d_metrics_complete = train(epochs=int(options.epochs), batch=int(options.batch))
 a_metrics_complete, d_metrics_complete = train(epochs=3, batch=30)
 print('saving generator weights')
 generator.save_weights('generator_model.hdf5')
@@ -136,6 +135,3 @@ try:
 
 except Exception as e:
     print(e)
-
-
-

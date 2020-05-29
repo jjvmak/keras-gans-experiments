@@ -111,8 +111,8 @@ save_path = "./results/" + datetime.now().strftime("%Y%m%d-%H%M%S")
 if not os.path.isdir(save_path):
     os.mkdir(save_path)
 
-# a_metrics_complete, d_metrics_complete = train(epochs=int(options.epochs), batch=int(options.batch))
-a_metrics_complete, d_metrics_complete = train(epochs=3, batch=30)
+a_metrics_complete, d_metrics_complete = train(epochs=int(options.epochs), batch=int(options.batch))
+
 print('saving generator weights')
 generator.save_weights('generator_model.hdf5')
 

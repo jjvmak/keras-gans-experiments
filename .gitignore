@@ -4,3 +4,4 @@ fcgan-images/
 *.hdf5
 results/
 generated/
+lfw-deepfunneled/

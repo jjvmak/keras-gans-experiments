@@ -7,7 +7,7 @@ import discriminator_builder
 import gan_builder
 import tensorflow as tf
 import data_handler
-import data_handler_lfw
+import data_handler_custom
 from datetime import datetime
 import os
 from optparse import OptionParser
@@ -85,25 +85,35 @@ parser.add_option('-b', '--batch', dest='batch', default=150,
 parser.add_option('-l', '--log-frequency', dest='log_frequency', default=50, help='Set training logging frequency.')
 parser.add_option('-g', '--generator-frequency', dest='generator_frequency', default=50,
                   help='Set generator frequency.')
+parser.add_option('-d', '--dataset', dest='dataset', default='minst',
+                  help='Set dataset.')
 (options, args) = parser.parse_args()
 
-(data, y_train), (x_test, y_test) = mnist.load_data()
-data = np.reshape(data, (data.shape[0], 28, 28, 1))
-data = data / 255
-#data_sampler = data_handler.Data_handler(data, y_train)
-data_sampler = data_handler_lfw.Data_handler_lfw()
-img_w, img_h = data.shape[1:3]
+if options.dataset == 'custom':
+    data_sampler = data_handler_custom.Data_handler_custom()
+    img_w, img_h = 64, 64
+    feature_map_dim = 16
+    depth = 32
+
+else:
+    (data, y_train), (x_test, y_test) = mnist.load_data()
+    data = np.reshape(data, (data.shape[0], 28, 28, 1))
+    data = data / 255
+    data_sampler = data_handler.Data_handler(data, y_train)
+    img_w, img_h = data.shape[1:3]
+    feature_map_dim = 7
+    depth = 64
 
 # build discriminator
 loss = tf.keras.losses.BinaryCrossentropy(
     from_logits=False, label_smoothing=0.1, reduction="auto", name="binary_crossentropy"
 )
-discriminator = discriminator_builder.build()
+discriminator = discriminator_builder.build(w=img_w, h=img_h, depth=depth)
 discriminator.compile(loss='binary_crossentropy', optimizer=RMSprop(lr=0.0008, decay=6e-8, clipvalue=1.0),
                       metrics=['accuracy'])
 
 # build generator
-generator = generator_builder.build()
+generator = generator_builder.build(depth=depth, feature_map_dim=feature_map_dim)
 
 # build gan
 gan = gan_builder.build(generator, discriminator)

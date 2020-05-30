@@ -5,15 +5,15 @@ from keras.optimizers import RMSprop
 from keras.layers import LeakyReLU
 
 
-def build(z_dim=100, depth=64, p=0.2):  # 100 dimensional latent space / p represents dropout rate
+def build(z_dim=100, depth=32, feature_map_dim=7, p=0.2):  # 100 dimensional latent space / p represents dropout rate
     # define inputs
     inputs = Input((z_dim,), name='input')
 
     # first dense layer
-    dense1 = Dense(7 * 7 * 64, activation=None, name='dense_1_1')(inputs)
+    dense1 = Dense(feature_map_dim * feature_map_dim * depth, activation=None, name='dense_1_1')(inputs)
     dense1 = BatchNormalization(momentum=0.9, name='dense_1_2')(dense1)
     dense1 = LeakyReLU(0.2, name='dense_1_3')(dense1)
-    dense1 = Reshape((7, 7, 64), name='dense_1_4')(dense1)
+    dense1 = Reshape((feature_map_dim, feature_map_dim, depth), name='dense_1_4')(dense1)
     dense1 = Dropout(p, name='dense_1_5')(dense1)
 
     # deconv layers

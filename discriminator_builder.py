@@ -2,7 +2,7 @@ from keras.models import Model
 from keras.layers import Input, Dense, Conv2D, Dropout, Flatten, Activation, MaxPooling2D
 from keras.layers import LeakyReLU
 
-def build(w=28, h=28, depth=64, p=0.2):
+def build(w=28, h=28, depth=32, p=0.2):
     # Define inputs
     inputs = Input((w, h, 1))
 
@@ -28,7 +28,7 @@ def build(w=28, h=28, depth=64, p=0.2):
     conv4 = Flatten()(Dropout(p)(conv3))
 
     # output layer
-    output = Dense(1)(conv4)  # , activation='sigmoid')(conv4)
+    output = Dense(1)(conv4)
     output = Activation('sigmoid')(output)
 
     # model def

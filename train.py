@@ -36,8 +36,8 @@ def train(epochs=1000, batch=150):
         fake_imgs = generator.predict(np.random.uniform(-1.0, 1.0, size=[batch, 100]))
 
         x = np.concatenate((real_imgs, fake_imgs))
-        y = np.ones([2 * batch, 1])
-        y[batch:, :] = 0
+        y = np.zeros(2 * batch)
+        y[:batch] = 0.9
 
         make_trainable(discriminator, True)
 
@@ -79,13 +79,13 @@ def train(epochs=1000, batch=150):
 
 # parse options
 parser = OptionParser()
-parser.add_option('-e', '--epochs', dest='epochs', default=1000, help='Number of epochs.')
-parser.add_option('-b', '--batch', dest='batch', default=150,
+parser.add_option('-e', '--epochs', dest='epochs', default=5000, help='Number of epochs.')
+parser.add_option('-b', '--batch', dest='batch', default=30,
                   help='Batch size. Use only dozens of equality. For example 50.')
 parser.add_option('-l', '--log-frequency', dest='log_frequency', default=50, help='Set training logging frequency.')
 parser.add_option('-g', '--generator-frequency', dest='generator_frequency', default=50,
                   help='Set generator frequency.')
-parser.add_option('-d', '--dataset', dest='dataset', default='minst',
+parser.add_option('-d', '--dataset', dest='dataset', default='custom',
                   help='Set dataset.')
 (options, args) = parser.parse_args()
 

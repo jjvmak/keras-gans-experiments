@@ -1,11 +1,12 @@
 from keras.models import Sequential
-from keras.optimizers import RMSprop, Adam
-import tensorflow as tf
+from keras.optimizers import RMSprop
 
+# Combined GAN model.
 def build(generator, discriminator):
-    loss = tf.keras.losses.BinaryCrossentropy(
-        from_logits=False, label_smoothing=0.0, reduction="auto", name="binary_crossentropy"
-    )
+    # This results in a model that takes noise vector as input,
+    # generates image and outputs a value,
+    # how convinced the discriminator is that the image is real.
+    # I.e. D(G(z))
     model = Sequential()
     model.add(generator)
     model.add(discriminator)

@@ -1,12 +1,14 @@
 import numpy as np
 
-
+# Data handler for MNIST dataset.
 class Data_handler:
 
     def __init__(self, x, y):
+        # Images and corresponding labels.
         self.x = x
         self.y = y
 
+        # Save the indexes where the corresponding labels occur.
         self.y_0 = np.where(self.y == 0)
         self.y_1 = np.where(self.y == 1)
         self.y_2 = np.where(self.y == 2)
@@ -18,6 +20,7 @@ class Data_handler:
         self.y_8 = np.where(self.y == 8)
         self.y_9 = np.where(self.y == 9)
 
+        # Use the saved index locations to create an array of images of each label.
         self.train_x_0 = np.take(self.x, self.y_0, axis=0)[0]
         self.train_x_1 = np.take(self.x, self.y_1, axis=0)[0]
         self.train_x_2 = np.take(self.x, self.y_2, axis=0)[0]
@@ -29,9 +32,13 @@ class Data_handler:
         self.train_x_8 = np.take(self.x, self.y_8, axis=0)[0]
         self.train_x_9 = np.take(self.x, self.y_9, axis=0)[0]
 
-        self.random_sample(20)
-
+    # Returns random sample size of n.
+    # Ensures balanced classes.
+    # TODO: handle uneven n
     def random_sample(self, n):
+
+        # 10 different digits in the dataset.
+        # n / 10 = number of how much be sampled from each array.
         batch = int(n / 10)
         x_0 = np.reshape(self.train_x_0[np.random.choice(self.train_x_0.shape[0], batch, replace=False)],
                          (batch, 28, 28, 1))
@@ -54,6 +61,7 @@ class Data_handler:
         x_9 = np.reshape(self.train_x_9[np.random.choice(self.train_x_9.shape[0], batch, replace=False)],
                          (batch, 28, 28, 1))
 
+        # Concatenate, shuffle and return.
         args = (x_0,x_1,x_2,x_3,x_4,x_5,x_6,x_7,x_8,x_9)
         arr = np.concatenate(args)
         np.random.shuffle(arr)

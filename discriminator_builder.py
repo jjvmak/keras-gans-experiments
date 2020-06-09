@@ -2,8 +2,21 @@ from keras.models import Model
 from keras.layers import Input, Dense, Conv2D, Dropout, Flatten, Activation
 from keras.layers import LeakyReLU
 
-# Builds the discriminator model.
+
 def build(w=28, h=28, depth=32, p=0.2):
+    """ Builds the discriminator model.
+
+        Args:
+            w: width of input
+            h: height of input
+            depth: layer depth parameter
+            p: dropout rate parameter
+
+        Returns:
+            model: Keras model
+
+    """
+
     # Define inputs
     inputs = Input((w, h, 1))
 

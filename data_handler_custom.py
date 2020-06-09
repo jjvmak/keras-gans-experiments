@@ -17,6 +17,14 @@ class Data_handler_custom:
     # Normalize pixel values in range 0 to 1.
     # Reshape to (64, 64, 1)
     def read_image(self, name):
+        """
+            Args:
+                name: image name
+
+            Returns:
+                gray_reshaped: cropped and reshaped gray scale image
+
+        """
         img = cv2.imread('./dataset/' + name)
         img = self.crop_around_center(image=img, width=120, height=120)
         resized = cv2.resize(img, (int(64), int(64)))
@@ -27,6 +35,14 @@ class Data_handler_custom:
 
     # Draws a random sample size of batch.
     def random_sample(self, batch):
+        """
+            Args:
+                batch: size of batch
+
+            Returns:
+                image_array: array of images size of batch
+
+        """
         arr = []
         image_names = np.random.choice(self.arr, batch)
         for name in image_names:
@@ -34,9 +50,20 @@ class Data_handler_custom:
         image_array = np.array(arr)
         return image_array
 
-    #  Given a NumPy / OpenCV 2 image, crops it to the given width and height, around it's centre point.
+    #   point.
     def crop_around_center(self, image, width, height):
+        """Given a NumPy / OpenCV 2 image,
+           crops it to the given width and height, around it's centre
 
+           Args:
+               image: image
+               width: desired width
+               height desired height
+
+            Returns:
+                image: cropped image
+
+        """
         image_size = (image.shape[1], image.shape[0])
         image_center = (int(image_size[0] * 0.5), int(image_size[1] * 0.5))
 

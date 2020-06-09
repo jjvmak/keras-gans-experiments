@@ -3,10 +3,20 @@ from keras.optimizers import RMSprop
 
 # Combined GAN model.
 def build(generator, discriminator):
-    # This results in a model that takes noise vector as input,
-    # generates image and outputs a value,
-    # how convinced the discriminator is that the image is real.
-    # I.e. D(G(z))
+    """ Results in a model that takes noise vector as input,
+        generates image and outputs a value,
+        how convinced the discriminator is that the image is real.
+        I.e. D(G(z))
+
+        Args:
+            generator: generator model
+            discriminator: discriminator model
+
+        Returns:
+            model: Keras model
+
+    """
+
     model = Sequential()
     model.add(generator)
     model.add(discriminator)

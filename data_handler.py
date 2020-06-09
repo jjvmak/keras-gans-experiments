@@ -4,6 +4,12 @@ import numpy as np
 class Data_handler:
 
     def __init__(self, x, y):
+        """
+            Args:
+                 x: images
+                 y: labels
+        """
+
         # Images and corresponding labels.
         self.x = x
         self.y = y
@@ -36,6 +42,13 @@ class Data_handler:
     # Ensures balanced classes.
     # TODO: handle uneven n
     def random_sample(self, n):
+        """
+            Args:
+                n: sample size
+
+            Returns:
+                arr: random sample size of n
+         """
 
         # 10 different digits in the dataset.
         # n / 10 = number of how much be sampled from each array.

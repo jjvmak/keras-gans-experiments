@@ -13,8 +13,12 @@ from optparse import OptionParser
 import pandas as pd
 
 
-# Iterates through network layers and sets layer.trainable true / false.
 def make_trainable(net, val):
+    """ Iterates through network layers and sets layer.trainable true / false.
+        Args:
+            net: network
+            val: boolean for setting layer trainable to false / true
+    """
     net.trainable = val
     for l in net.layers:
         l.trainable = val
@@ -22,7 +26,14 @@ def make_trainable(net, val):
 
 # Training loop.
 def train(epochs=1000, batch=150):
-    # Arrays for storing the discriminant and generator accuracy and loss metrics for each epoch.
+    """ Arrays for storing the discriminant and generator accuracy
+        and loss metrics for each epoch.
+
+        Args:
+            epochs: number of epochs
+            batch: batch size
+    """
+
     d_metrics = []
     a_metrics = []
 

@@ -5,6 +5,19 @@ from keras.layers import LeakyReLU
 
 
 def build(z_dim=100, depth=32, feature_map_dim=7, p=0.2):
+    """ Builds the generator model.
+
+        Args:
+            z_dim: noise vector dimension
+            depth: layer depth parameter
+            feature_map_dim: layer feature map dimension parameter
+            p: dropout rate parameter
+
+        Returns:
+            model: Keras model
+
+    """
+
     # Define inputs.
     inputs = Input((z_dim,), name='input')
 

@@ -4,9 +4,17 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import os
 
-# Generates results from trained generator and saves them into 4x4 figure.
-# Figures are saved to the disk.
+
 def generate(noise, i=0, save=True):
+    """ Generates results from trained generator and saves them into 4x4 figure.
+        Figures are saved to the disk.
+
+             Args:
+                 noise: noise vector
+                 i: iteration number
+                 save: should save images for the disk
+    """
+
     gen_imgs = generator.predict(noise)
 
     plt.figure(figsize=(5, 5))

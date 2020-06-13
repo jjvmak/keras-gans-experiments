@@ -26,8 +26,7 @@ def make_trainable(net, val):
 
 # Training loop.
 def train(epochs=1000, batch=150):
-    """ Arrays for storing the discriminant and generator accuracy
-        and loss metrics for each epoch.
+    """ Training loop for training the GAN model for predetermined number of epochs and batch size.
 
         Args:
             epochs: number of epochs
@@ -104,11 +103,11 @@ def train(epochs=1000, batch=150):
 
 # parse options
 parser = OptionParser()
-parser.add_option('-e', '--epochs', dest='epochs', default=2000, help='Number of epochs.')
+parser.add_option('-e', '--epochs', dest='epochs', default=10000, help='Number of epochs.')
 parser.add_option('-b', '--batch', dest='batch', default=30,
                   help='Batch size. Use only dozens of equality. For example 50.')
 parser.add_option('-l', '--log-frequency', dest='log_frequency', default=50, help='Set training logging frequency.')
-parser.add_option('-g', '--generator-frequency', dest='generator_frequency', default=50,
+parser.add_option('-g', '--generator-frequency', dest='generator_frequency', default=200,
                   help='Set generator frequency.')
 parser.add_option('-d', '--dataset', dest='dataset', default='custom',
                   help='Set dataset.')
